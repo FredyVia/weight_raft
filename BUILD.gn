@@ -1,0 +1,12 @@
+import("//build/ohos.gni")  # 导入编译模板
+ohos_executable("weight_raft") { # 可执行模块
+  sources = [       # 模块源码
+    "src/weight_raft.cpp",
+    "src/utils.cpp"
+  ]
+  include_dirs = [  # 模块依赖头文件目录
+    "include"
+  ]
+  part_name = "hello"    # 所属部件名称，必选
+  install_enable = true  # 是否默认安装（缺省默认不安装），可选
+}
