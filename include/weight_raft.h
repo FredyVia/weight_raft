@@ -10,11 +10,13 @@ class WeightRaftStateMachine : public braft::StateMachine {
   std::filesystem::path m_datapath;
   std::set<std::string> m_ips;
   int m_port;
+  std::string m_my_ip;
+
   std::shared_ptr<braft::Node> m_raft_node_ptr;
 
  public:
   WeightRaftStateMachine(std::string datapath, std::set<std::string> ips,
-                         int port);
+                         int port, std::string my_ip);
   void start();
   void on_apply(braft::Iterator& iter) override;
   void redirect(WeightResponse* response);

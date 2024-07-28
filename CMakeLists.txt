@@ -24,3 +24,6 @@ target_link_libraries(weight_raft unofficial::brpc::brpc-static)
 
 add_executable(node server_main.cpp)
 target_link_libraries(node weight_raft)
+
+add_executable(client client_main.cpp ${PROTO_SRCS})
+target_link_libraries(client unofficial::brpc::brpc-static)

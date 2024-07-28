@@ -14,16 +14,28 @@ using namespace std;
 namespace fs = std::filesystem;
 WeightRaftStateMachine::WeightRaftStateMachine(std::string datapath,
                                                std::set<std::string> ips,
-                                               int port)
-    : m_datapath(datapath), m_ips(ips), m_port(port) {
+                                               int port, std::string my_ip)
+    : m_datapath(datapath), m_ips(ips), m_port(port), m_my_ip(my_ip) {
   auto parent_path = m_datapath.parent_path();
-  if (fs::exists(parent_path) && fs::is_directory(parent_path)) {
-    throw runtime_error("path not exists: " + parent_path.string());
+  if (!fs::exists(parent_path) || !fs::is_directory(parent_path)) {
+    throw runtime_error("directory not exists: " + parent_path.string());
+  }
+  if (!fs::exists(datapath)) {
+    error_code ec;
+    fs::create_directories(datapath, ec);
+    if (ec) {
+      cout << "Error: Unable to create directory " << datapath << ". "
+           << ec.message();
+      throw runtime_error("mkdir error: " + datapath + ec.message());
+    }
+  } else if (!fs::is_directory(datapath)) {
+    throw runtime_error("datapath is file not directory: " + datapath);
   }
 }
 void WeightRaftStateMachine::start() {
   butil::EndPoint addr;
-  string ip = weight_raft::get_my_ip(m_ips);
+  // string ip = weight_raft::get_my_ip(m_ips);
+  string ip = m_my_ip;
   butil::str2endpoint(ip.c_str(), m_port, &addr);
   braft::NodeOptions node_options;
   node_options.initial_conf =
@@ -32,7 +44,7 @@ void WeightRaftStateMachine::start() {
   node_options.fsm = this;
   node_options.node_owns_fsm = false;
   node_options.snapshot_interval_s = 60;
-  string prefix = m_datapath;
+  string prefix = string("local://") + m_datapath.string();
   node_options.log_uri = prefix + "/log";
   node_options.raft_meta_uri = prefix + "/raft_meta";
   node_options.snapshot_uri = prefix + "/snapshot";

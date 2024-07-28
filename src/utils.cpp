@@ -92,6 +92,7 @@ vector<braft::PeerId> parse_to_peerids(const std::set<std::string> &ips,
     butil::str2endpoint(ip.c_str(), port, &ep);
     braft::PeerId peerid(ep);
     res.push_back(peerid);
+    cout << res.back() << endl;
   }
   return res;
 }

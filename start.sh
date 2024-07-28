@@ -7,7 +7,7 @@ NUM_NODES=3
 for ((i=1; i<=NUM_NODES; i++))
 do
   echo "Starting node with id: $i"
-  ./build/node --id $i 1>>./tmp/normal.txt 2>>./tmp/error.txt &
+  ./build/node $(pwd)/tmp/node_$i 127.0.0.$i 1>>./tmp/normal.txt 2>>./tmp/error.txt &
 
 done
 
