@@ -10,6 +10,8 @@ do
 done
 # echo "${addresses}"
 # 循环启动每个节点
+echo "pkill weight_server"
+pkill weight_server
 for ((id=1; id<=NUM_NODES; id++))
 do
   echo "Starting node with id: ${id}"

@@ -98,15 +98,18 @@ std::set<std::string> parse_nodes(const std::string &nodes_str) {
   return res;
 }
 
-vector<braft::PeerId> parse_to_peerids(const std::set<std::string> &ips,
-                                       const int &port) {
+braft::PeerId get_peerid(const std::string &ip, const int &port) {
+  butil::EndPoint ep;
+  butil::str2endpoint(ip.c_str(), port, &ep);
+  return braft::PeerId(ep);
+}
+vector<braft::PeerId> get_peerids(const std::set<std::string> &ips,
+                                  const int &port) {
   vector<braft::PeerId> res;
   res.reserve(ips.size());
   butil::EndPoint ep;
   for (auto ip : ips) {
-    butil::str2endpoint(ip.c_str(), port, &ep);
-    braft::PeerId peerid(ep);
-    res.push_back(peerid);
+    res.push_back(get_peerid(ip, port));
     cout << res.back() << endl;
   }
   return res;
@@ -128,5 +131,15 @@ std::string read_file(const std::string &path) {
   ifile.close();
   return block;
 }
+void split_address_port(const std::string& address_port, std::string& address, int& port) {
+    size_t colon_pos = address_port.find(':');
+    if (colon_pos == std::string::npos) {
+        throw std::invalid_argument("Invalid address:port format");
+    }
 
+    address = address_port.substr(0, colon_pos);
+    std::string port_str = address_port.substr(colon_pos + 1);
+
+    port = std::stoi(port_str);  // 将端口字符串转换为整数
+}
 }  // namespace weight_raft

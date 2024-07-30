@@ -31,7 +31,7 @@ void Server::start() {
   butil::EndPoint ep;
   butil::str2endpoint(m_my_ip.c_str(), m_port, &ep);
   if (m_server.Start(ep, NULL) != 0) {
-    LOG(ERROR) << "Fail to start Server";
+    log_error("Fail to start Server");
     throw runtime_error("start service failed");
   }
   // waiting_for_rpc();
@@ -99,6 +99,7 @@ void Server::setWeight(int weight) {
                         to_string(resp.weight_info().weight()));
   }
 }
+
 Server::~Server() { stop(); }
 
 }  // namespace weight_raft

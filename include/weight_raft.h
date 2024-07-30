@@ -1,8 +1,10 @@
 #include <braft/raft.h>
 
+#include <atomic>
 #include <map>
 #include <memory>
 #include <nlohmann/json.hpp>
+#include <shared_mutex>
 #include <string>
 
 #include "service.pb.h"
@@ -30,12 +32,20 @@ class WeightRaftStateMachine : public braft::StateMachine {
   std::set<std::string> m_ips;
   int m_port;
   std::string m_my_ip;
+  std::shared_ptr<braft::Node> m_raft_node_ptr;
+  butil::atomic<int64_t> m_leader_term = -1;
+  std::thread* m_worker_thread_ptr;
+
+  std::shared_mutex m_weights_mutex;
   std::map<std::string, WeightInfo>
       m_weights_ip_addr;  // service.proto中weights是int64
-  std::map<std::string, WeightInfo>
-      m_weights_device_id;  // service.proto中weights是int64
-  std::shared_ptr<braft::Node> m_raft_node_ptr;
-  butil::atomic<int64_t> m_leader_term;
+  // std::map<std::string, WeightInfo>
+  //     m_weights_device_id;  // service.proto中weights是int64
+
+  bool m_stop_thread = false;
+  // std::atomic<bool> m_work_flag = false;
+  // std::string m_new_master_ip;
+  // int m_new_max;
 
  public:
   WeightRaftStateMachine(std::string datapath, std::set<std::string> ips,
@@ -47,10 +57,18 @@ class WeightRaftStateMachine : public braft::StateMachine {
   void setWeight(::google::protobuf::RpcController* controller,
                  const WeightRequest*, WeightResponse*,
                  ::google::protobuf::Closure* done);
+  WeightInfo get_max_weight();
+  WeightInfo getWeight(std::string ip);
   void redirect(WeightResponse* response);
   void shutdown();
   void on_snapshot_save(braft::SnapshotWriter* writer, braft::Closure* done);
   int on_snapshot_load(braft::SnapshotReader* reader);
+  void on_leader_start(int64_t term);
+  void on_leader_stop(const butil::Status& status);
+  bool is_leader() const;
+  void checker_thread();
+  void thread_function();
+  void try_transfer_master();
 
   friend class WeightServiceImpl;
 };
@@ -77,9 +95,7 @@ class WeightServiceImpl : public WeightService {
   // Impelements service methods
   void setWeight(::google::protobuf::RpcController* controller,
                  const WeightRequest* request, WeightResponse* response,
-                 ::google::protobuf::Closure* done) override {
-    m_raft_ptr->setWeight(controller, request, response, done);
-  }
+                 ::google::protobuf::Closure* done) override;
   void getWeight(::google::protobuf::RpcController* controller,
                  const WeightRequest* request, WeightResponse* response,
                  ::google::protobuf::Closure* done) override;
