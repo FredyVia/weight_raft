@@ -57,7 +57,7 @@ class WeightRaftStateMachine : public braft::StateMachine {
   void setWeight(::google::protobuf::RpcController* controller,
                  const WeightRequest*, WeightResponse*,
                  ::google::protobuf::Closure* done);
-  WeightInfo get_max_weight();
+  std::vector<WeightInfo> get_sorted_weights();
   WeightInfo getWeight(std::string ip);
   void redirect(WeightResponse* response);
   void shutdown();

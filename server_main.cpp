@@ -24,9 +24,6 @@ int main(int argc, char* args[]) {
   set<string> ips = parse_nodes(string(args[3]));
   server_ptr = new Server(datapath, ips, port, args[4]);
   server_ptr->start();
-  cout << "waiting to set weight" << endl;
-  sleep(5);
-  server_ptr->setWeight(weight);
   int count = 0;
   while (!brpc::IsAskedToQuit()) {
     cout << "running" << std::flush;

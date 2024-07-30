@@ -134,15 +134,17 @@ void WeightRaftStateMachine::on_snapshot_save(braft::SnapshotWriter* writer,
   // file2.close();
 }
 
-WeightInfo WeightRaftStateMachine::get_max_weight() {
+vector<WeightInfo> WeightRaftStateMachine::get_sorted_weights() {
   std::shared_lock<std::shared_mutex> lock(m_weights_mutex);
-  auto p = max_element(m_weights_ip_addr.begin(), m_weights_ip_addr.end(),
-                       [](const auto& p1, const auto& p2) {
-                         return p1.second.weight() < p2.second.weight();
-                       });
-  WeightInfo res;
-  if (p != m_weights_ip_addr.end()) res = p->second;
-  LOG(INFO) << "ip " << res.ip_addr() << ", max weight: " << res.weight();
+  vector<WeightInfo> res;
+  std::transform(m_weights_ip_addr.begin(), m_weights_ip_addr.end(),
+                 std::back_inserter(res),
+                 [](const auto& p) { return p.second; });
+
+  lock.unlock();
+  sort(res.begin(), res.end(), [](const auto& w1, const auto& w2) {
+    return w1.weight() > w2.weight();
+  });
   return res;
 }
 
@@ -272,12 +274,16 @@ void WeightRaftStateMachine::thread_function() {
 }
 
 void WeightRaftStateMachine::try_transfer_master() {
-  WeightInfo weight_info = get_max_weight();
-  if (weight_info.weight() > getWeight(m_my_ip).weight()) {
-    LOG(INFO) << "transfer leadership";
+  vector<WeightInfo> weight_infos = get_sorted_weights();
+  for (auto&& weight_info : weight_infos) {
+    if (weight_info.weight() <= getWeight(m_my_ip).weight()) {
+      break;
+    }
     if (m_raft_node_ptr->transfer_leadership_to(
-            get_peerid(weight_info.ip_addr().c_str(), m_port)) != 0)
-      throw runtime_error("transfer_leadership_to failed");
+            get_peerid(weight_info.ip_addr().c_str(), m_port)) == 0) {
+      LOG(INFO) << "transfer leadership" << weight_info.ip_addr();
+      break;
+    }
   }
 }
 
