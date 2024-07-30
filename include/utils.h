@@ -13,5 +13,7 @@ std::set<std::string> get_all_ips();
 std::string get_my_ip(const std::set<std::string> &ips);
 std::vector<braft::PeerId> parse_to_peerids(const std::set<std::string> &ips,
                                             const int &port);
+std::set<std::string> parse_nodes(const std::string &nodes_str);
+std::string read_file(const std::string &path);
 
 }  // namespace weight_raft

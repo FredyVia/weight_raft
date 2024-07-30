@@ -8,6 +8,8 @@
 #include <stdio.h>
 
 #include <algorithm>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <set>
 #include <string>
@@ -15,6 +17,7 @@
 
 namespace weight_raft {
 using namespace std;
+namespace fs = std::filesystem;
 
 void log_(const char *label, const char *format, ...) {
   va_list args;
@@ -83,6 +86,18 @@ std::string get_my_ip(const std::set<std::string> &ips) {
   }
   return *(intersection.begin());
 }
+
+std::set<std::string> parse_nodes(const std::string &nodes_str) {
+  set<std::string> res;
+  istringstream stream(nodes_str);
+  string token;
+
+  while (getline(stream, token, ',')) {
+    if (token.size()) res.insert(token);
+  }
+  return res;
+}
+
 vector<braft::PeerId> parse_to_peerids(const std::set<std::string> &ips,
                                        const int &port) {
   vector<braft::PeerId> res;
@@ -96,4 +111,22 @@ vector<braft::PeerId> parse_to_peerids(const std::set<std::string> &ips,
   }
   return res;
 }
+
+std::string read_file(const std::string &path) {
+  int filesize = fs::file_size(path);
+  string block;
+  block.resize(filesize);
+  ifstream ifile(path, std::ios::binary);
+  if (!ifile) {
+    LOG(FATAL) << "Failed to open file for reading." << path << endl;
+    throw std::runtime_error("openfile error:" + path);
+  }
+  if (!ifile.read(&block[0], filesize)) {
+    LOG(FATAL) << "Failed to read file content." << endl;
+    throw std::runtime_error("readfile error:" + path);
+  }
+  ifile.close();
+  return block;
+}
+
 }  // namespace weight_raft

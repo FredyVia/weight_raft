@@ -23,6 +23,7 @@ class Server {
          std::string my_ip);
   void start();
   void stop();
+  void setWeight(int weight);
   ~Server();
 };
 
