@@ -1,37 +1,35 @@
-#include <csignal>
 #include <iostream>
 #include <set>
 #include <string>
 
-#include "server.h"
-#include "utils.h"
+#include "weight_raft/server.h"
+#include "weight_raft/utils.h"
 
 using namespace std;
 using namespace weight_raft;
 
-static Server* server_ptr = nullptr;
-
 int main(int argc, char* args[]) {
-  if (argc != 5) {
-    cout << "client <datapath> <weight> <all_ipaddresses> <my_ipaddress>"
-         << endl;
+  if (argc != 4) {
+    cout << "client <datapath> <all_ipaddresses> <my_ipaddress>" << endl;
     return -1;
   }
-
   int port = 1088;
   string datapath = string(args[1]);
-  int weight = stoi(args[2]);
-  set<string> ips = parse_nodes(string(args[3]));
-  server_ptr = new Server(datapath, ips, port, args[4]);
+  set<string> ips = parse_nodes(string(args[2]));
+
+  WeightServer* server_ptr = new WeightServer(datapath, ips, port, args[3], args[3]);
   server_ptr->start();
+
+  // server_ptr->start();
   int count = 0;
   while (!brpc::IsAskedToQuit()) {
-    cout << "running" << std::flush;
-    for (int i = 0; i < 20; i++) {
-      sleep(2);
-      cout << "." << std::flush;
+    sleep(2);
+    cout << "." << std::flush;
+    count++;
+    if (count == 5) {
+      cout << endl;
+      cout << "running" << std::flush;
     }
-    cout << endl;
   }
   return 0;
 }

@@ -2,3 +2,5 @@ tmp
 build
 .vscode
 .cache
+*.pb.h
+*.pb.cc

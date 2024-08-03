@@ -19,11 +19,14 @@ protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_FILE})
 include_directories(include ${CMAKE_CURRENT_BINARY_DIR} )
 
 add_library(weight_raft SHARED ${PROTO_SRCS} ${SRC_NODE}) # 添加可执行文件
+target_compile_definitions(weight_raft PRIVATE USE_CMAKE)
 target_link_libraries(weight_raft unofficial::braft::braft-static)
 target_link_libraries(weight_raft unofficial::brpc::brpc-static)
 
 add_executable(weight_server server_main.cpp)
+target_compile_definitions(weight_server PRIVATE USE_CMAKE)
 target_link_libraries(weight_server weight_raft)
 
 add_executable(client client_main.cpp ${PROTO_SRCS})
+target_compile_definitions(client PRIVATE USE_CMAKE)
 target_link_libraries(client unofficial::brpc::brpc-static)

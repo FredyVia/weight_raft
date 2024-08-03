@@ -1,12 +1,50 @@
-import("//build/ohos.gni")  # 导入编译模板
-ohos_executable("weight_raft") { # 可执行模块
-  sources = [       # 模块源码
+import("//build/ohos.gni")
+
+config("weight_raft_headers") {
+  include_dirs = [
+    "include",
+    "//third_party/json/include",
+  ]
+}
+
+ohos_shared_library("weight_raft") {
+  sources = [
+    "src/server.cpp",
+    "src/service.pb.cc",
+    "src/utils.cpp",
     "src/weight_raft.cpp",
-    "src/utils.cpp"
   ]
-  include_dirs = [  # 模块依赖头文件目录
-    "include"
+  include_dirs = [
+    "include",
+    "//third_party/json/include",
   ]
-  part_name = "hello"    # 所属部件名称，必选
-  install_enable = true  # 是否默认安装（缺省默认不安装），可选
+  public_configs = [ ":weight_raft_headers" ]
+  public_deps = [
+    "//third_party/braft:braft",
+    "//third_party/brpc:brpc",
+  ]
+  use_rtti = true
+  use_exceptions = true
+  part_name = "weight_raft"
+  install_enable = true
+}
+
+ohos_executable("weight_raft_client") {
+  sources = [ "client_main.cpp" ]
+  include_dirs = [ "include" ]
+  deps = [ ":weight_raft" ]
+  use_rtti = true
+  use_exceptions = true
+  part_name = "weight_raft"
+  install_enable = true
+}
+
+ohos_executable("weight_raft_server") {
+  sources = [ "server_main.cpp" ]
+  include_dirs = [ "include" ]
+  deps = [ ":weight_raft" ]
+  use_rtti = true
+  use_exceptions = true
+  part_name = "weight_raft"
+  install_enable = true
 }

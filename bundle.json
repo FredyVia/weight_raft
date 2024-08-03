@@ -1,32 +1,42 @@
 {
-  "name": "@ohos/hello",
-  "description": "Hello world example.",
+  "name": "@ohos/weight_raft",
+  "description": "weight_raft.",
   "version": "3.1",
   "license": "Apache License 2.0",
   "publishAs": "code-segment",
   "segment": {
-      "destPath": "applications/hello"
+    "destPath": "third_party/weight_raft"
   },
   "dirs": {},
   "scripts": {},
   "component": {
-      "name": "hello",
-      "subsystem": "applications",
-      "syscap": [],
-      "features": [],
-      "adapted_system_type": [ "mini", "small", "standard" ],
-      "rom": "10KB",
-      "ram": "10KB",
-      "deps": {
-          "components": [],
-          "third_party": []
-      },
-      "build": {
-          "sub_component": [
-              "//applications/hello:helloworld"
-          ],
-          "inner_kits": [],
-          "test": []
-      }
+    "name": "weight_raft",
+    "subsystem": "thirdparty",
+    "syscap": [],
+    "features": [],
+    "adapted_system_type": [
+      "mini",
+      "small",
+      "standard"
+    ],
+    "rom": "10KB",
+    "ram": "10KB",
+    "deps": {
+      "components": [],
+      "third_party": [
+        "braft",
+        "brpc",
+        "json"
+      ]
+    },
+    "build": {
+      "sub_component": [
+        "//third_party/weight_raft:weight_raft",
+        "//third_party/weight_raft:weight_raft_server",
+        "//third_party/weight_raft:weight_raft_client"
+      ],
+      "inner_kits": [],
+      "test": []
+    }
   }
 }

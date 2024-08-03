@@ -15,7 +15,7 @@ pkill weight_server
 for ((id=1; id<=NUM_NODES; id++))
 do
   echo "Starting node with id: ${id}"
-  ./build/weight_server $(pwd)/tmp/node_${id} ${id} ${addresses} ${BASE}${id} > tmp/std_$id.log 2>&1 &
+  ./build/weight_server $(pwd)/tmp/node_${id} ${addresses} ${BASE}${id} > tmp/std_$id.log 2>&1 &
 
 done
 

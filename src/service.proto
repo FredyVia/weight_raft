@@ -3,18 +3,18 @@ package weight_raft;
 option cc_generic_services = true;
 
 message WeightInfo {
-  string device_id = 1;
-  string ip_addr = 2;
-  int64 weight = 3;
+  optional string network_id = 1;
+  optional string ip_addr = 2;
+  optional int64 weight = 3;
 };
 
 message WeightRequest {
-  WeightInfo weight_info = 1;
+  optional WeightInfo weight_info = 1;
 };
 
 message WeightResponse {
-  bool success = 1;
-  WeightInfo weight_info = 2;
+  optional bool success = 1;
+  optional WeightInfo weight_info = 2;
   optional string fail_info = 3;
   optional string redirect = 4;
 };
@@ -23,10 +23,15 @@ message MasterRequest {
 };
 
 message MasterResponse {
-  bool success = 1;
-  string master = 2;
-  optional string fail_info = 3;
+  optional bool success = 1;
+  optional string master_network_id = 2;
+  optional string master_ip = 3;
+  optional string fail_info = 4;
 };
+
+service ServerService {
+  rpc setServerWeight(WeightRequest) returns (WeightResponse);
+}
 
 service WeightService {
   rpc setWeight(WeightRequest) returns (WeightResponse);
